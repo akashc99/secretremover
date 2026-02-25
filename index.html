@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Remover</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;0,800;1,400&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-text">
+                    <h1>Secret<span class="accent">Remover</span></h1>
+                    <p class="tagline">Protect your code • Remove secrets • Share safely</p>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <!-- Upload Section -->
+            <section id="uploadSection" class="neon-panel">
+                <div class="panel-content">
+                    <div class="upload-header">
+                        <h2><span class="step-num">01</span> Upload Source Code</h2>
+                        <p>Drop your ZIP file to scan for hardcoded secrets</p>
+                    </div>
+
+                    <div id="dropzone" class="dropzone">
+                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                        <div class="dropzone-text">
+                            <span class="main-text">Click to Upload or Drag and Drop</span>
+                            <span class="sub-text">Supported format: .zip</span>
+                        </div>
+                    </div>
+                    <input type="file" id="fileInput" accept=".zip" class="hidden">
+
+                </div>
+            </section>
+
+            <div class="trust-badges"
+                style="text-align: center; margin-bottom: 40px; font-family: 'Inter', sans-serif; font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted);">
+                Client-Side Only · Open Source · Secure &amp; Private
+            </div>
+
+            <!-- Scanning Section -->
+            <section id="progressSection" class="neon-panel hidden">
+
+                <div class="panel-content">
+                    <div class="scan-header">
+                        <h2><span class="step-num">02</span> Scanning in Progress</h2>
+                    </div>
+
+                    <div class="scanner-display">
+                        <div class="scanner-visual">
+                            <div class="scan-ring ring-1"></div>
+                            <div class="scan-ring ring-2"></div>
+                            <div class="scan-ring ring-3"></div>
+                            <div class="scan-center">
+                                <span class="scan-icon">🔍</span>
+                            </div>
+                        </div>
+                        <div class="scan-stats">
+                            <div class="scan-stat">
+                                <span class="stat-label">Files</span>
+                                <span id="scanFiles" class="stat-value">0</span>
+                            </div>
+                            <div class="scan-stat">
+                                <span class="stat-label">Secrets</span>
+                                <span id="scanSecrets" class="stat-value highlight">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div id="progressFill" class="progress-fill"></div>
+
+                        </div>
+                        <div class="progress-info">
+                            <span id="progressText">Initializing...</span>
+                            <span id="progressPercent">0%</span>
+                        </div>
+                    </div>
+
+                    <div class="scan-log">
+                        <pre id="scanOutput"></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section id="resultsSection" class="neon-panel hidden">
+
+                <div class="panel-content">
+                    <div class="results-header">
+                        <h2><span class="step-num">03</span> Removal Mode</h2>
+                        <p>Select which secrets to remove from your code</p>
+                    </div>
+
+                    <!-- Summary Cards -->
+                    <div id="summaryCards" class="summary-cards"></div>
+
+                    <!-- Category Breakdown -->
+                    <div class="category-breakdown">
+                        <div class="section-header">
+                            <h3>Detected Secret Types</h3>
+                            <div class="header-line"></div>
+                        </div>
+                        <div id="categoryCards" class="category-cards"></div>
+                    </div>
+
+                    <!-- Removal Selection -->
+                    <div class="removal-section">
+                        <div class="section-header">
+                            <h3>Select Secrets to Remove</h3>
+                            <div class="header-line"></div>
+                            <div class="selection-actions">
+                                <button id="selectAllBtn" class="action-btn">
+                                    <span class="btn-icon">✓</span> Select All
+                                </button>
+                                <button id="deselectAllBtn" class="action-btn danger">
+                                    <span class="btn-icon">✕</span> Deselect All
+                                </button>
+                            </div>
+                        </div>
+                        <div id="findings" class="findings-list"></div>
+                    </div>
+
+                    <!-- Download Section -->
+                    <div class="download-section">
+                        <div class="download-preview">
+                            <div class="preview-stat">
+                                <span class="preview-label">Secrets to Remove</span>
+                                <span id="removeCount" class="preview-value highlight-pink">0</span>
+                            </div>
+                            <div class="preview-stat">
+                                <span class="preview-label">Secrets to Keep</span>
+                                <span id="keepCount" class="preview-value highlight-cyan">0</span>
+                            </div>
+                        </div>
+
+                        <div class="download-actions">
+                            <button id="downloadBtn" class="btn primary large">
+
+                                <span class="btn-content">
+                                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                        <polyline points="7 10 12 15 17 10" />
+                                        <line x1="12" y1="15" x2="12" y2="3" />
+                                    </svg>
+                                    <span class="btn-text">Download Clean Code</span>
+                                </span>
+                            </button>
+
+                            <div class="secondary-actions">
+                                <button id="resetBtn" class="btn secondary">
+                                    <span class="btn-content">↺ Start Over</span>
+                                </button>
+                                <button id="exportJsonBtn" class="btn secondary">
+                                    <span class="btn-content">📄 Export JSON</span>
+                                </button>
+                                <button id="exportCsvBtn" class="btn secondary">
+                                    <span class="btn-content">📊 Export CSV</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Re-scan -->
+                    <div class="custom-rescan-section"
+                        style="margin-top: 40px; padding-top: 32px; border-top: 4px solid #000;">
+                        <h3 style="margin-bottom: 12px;">Re-scan with Custom Keyword / Regex</h3>
+                        <div style="display: flex; gap: 12px; align-items: stretch;">
+                            <input type="text" id="customPatternInput" class="custom-pattern-input"
+                                placeholder="e.g. password1|password2 or \b[A-Z0-9]{10}\b"
+                                style="flex: 1; padding: 12px; border: 3px solid #000; font-family: 'Inter', sans-serif;">
+                            <button id="rescanBtn" class="btn primary" style="padding: 12px 24px; white-space: nowrap;">
+                                <span class="btn-content">Re-scan</span>
+                            </button>
+                        </div>
+                        <p
+                            style="margin-top: 8px; font-family: 'Inter', sans-serif; font-size: 0.8rem; color: var(--text-muted); font-style: italic;">
+                            To search for multiple keywords at once, separate them with a pipe character (e.g.
+                            <strong>password1|password2</strong>)
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="patterns.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

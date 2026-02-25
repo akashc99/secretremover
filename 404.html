@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 — Secret Remover</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link
+        href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600;800&family=Inter:wght@400;500;600&display=swap"
+        <link rel="stylesheet" href="styles.css">
+    <style>
+        .container-404 {
+            text-align: center;
+            padding: 40px;
+            margin-top: 40px;
+        }
+
+        /* Magnifying glass */
+        .magnifier {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 40px;
+        }
+
+        .magnifier-lens {
+            width: 120px;
+            height: 120px;
+            border: 5px solid #000;
+            border-radius: 50%;
+            position: absolute;
+            top: 0;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .magnifier-lens span {
+            font-family: 'Inter', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            color: #000;
+            letter-spacing: -1px;
+        }
+
+        .magnifier-handle {
+            width: 6px;
+            height: 70px;
+            background: #000;
+            position: absolute;
+            bottom: 0;
+            right: 20px;
+            transform: rotate(-45deg);
+            transform-origin: top center;
+            border-radius: 3px;
+        }
+
+        .error-code {
+            font-size: 5rem;
+            font-weight: 800;
+            letter-spacing: -3px;
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+
+        .error-message {
+            font-size: 1.5rem;
+            font-style: italic;
+            margin-bottom: 8px;
+        }
+
+        .error-sub {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+            letter-spacing: 0.5px;
+        }
+    </style>
+    <script>
+        // Redirect to main page if URL has a query string
+        if (window.location.search) {
+            window.location.href = '/';
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-text">
+                    <h1>Secret<span class="accent">Remover</span></h1>
+                </div>
+            </div>
+        </header>
+
+        <div class="container-404">
+            <div class="magnifier">
+                <div class="magnifier-lens">
+                    <span>404</span>
+                </div>
+                <div class="magnifier-handle"></div>
+            </div>
+
+            <h1 class="error-code">Page Not Found</h1>
+            <p class="error-message">No secrets here — this page doesn't exist.</p>
+            <p class="error-sub">The page you're looking for might have been removed or never existed.</p>
+
+            <a href="/" class="btn secondary" style="display: inline-block; text-decoration: none;">
+                <span class="btn-content">← Back to Secret Remover</span>
+            </a>
+        </div>
+    </div>
+</body>
+
+</html>
