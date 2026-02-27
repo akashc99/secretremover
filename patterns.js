@@ -1,14 +1,30 @@
-// Secret detection patterns based on GitLeaks, TruffleHog, and other tools
+/**
+ * ==============================================================================
+ * ACKNOWLEDGMENTS & CREDITS
+ * ==============================================================================
+ * The regex patterns in this file were curated, adapted, and inspired by the 
+ * incredible research from the following open-source security tools:
+ * 
+ * 1. GitLeaks (https://github.com/gitleaks/gitleaks) - MIT License
+ * 2. TruffleHog (https://github.com/trufflesecurity/trufflehog) - AGPL-3.0
+ * 3. Yelp detect-secrets (https://github.com/Yelp/detect-secrets) - Apache 2.0
+ * 
+ * We deeply respect their work in making the internet a safer place.
+ * ==============================================================================
+ */
+
 // Each pattern has: name, regex, redaction placeholder, and category
 
 const PATTERN_CATEGORIES = {
     cloud: { name: "Cloud Providers", description: "AWS, GCP, Azure credentials", enabled: true },
     vcs: { name: "Version Control", description: "GitHub, GitLab, Bitbucket tokens", enabled: true },
-    communication: { name: "Communication", description: "Slack, Discord webhooks & tokens", enabled: true },
-    payment: { name: "Payment", description: "Stripe, PayPal, Square keys", enabled: true },
+    communication: { name: "Communication", description: "Slack, Discord, Telegram, Teams webhooks & tokens", enabled: true },
+    payment: { name: "Payment", description: "Stripe, PayPal, Square, Plaid keys", enabled: true },
     database: { name: "Database", description: "Connection strings with credentials", enabled: true },
     privateKeys: { name: "Private Keys", description: "RSA, SSH, PGP private keys", enabled: true },
     apiKeys: { name: "API Keys", description: "Various service API keys", enabled: true },
+    ci_cd: { name: "CI/CD", description: "CircleCI, Drone, Travis, Azure DevOps tokens", enabled: true },
+    ai_ml: { name: "AI & ML", description: "OpenAI, Anthropic, HuggingFace, Replicate keys", enabled: true },
     generic: { name: "Generic Secrets", description: "Passwords, tokens in assignments", enabled: true },
     entropy: { name: "High Entropy", description: "Suspicious high-entropy strings", enabled: true }
 };
@@ -34,39 +50,45 @@ const SECRET_PATTERNS = [
         category: "cloud"
     },
 
-    // GitHub (vcs)
+    // GitHub (vcs) — consolidated per GitLeaks patterns
     {
-        name: "GitHub Personal Access Token",
-        regex: /ghp_[A-Za-z0-9]{36}/g,
+        name: "GitHub Personal Access Token (Classic)",
+        regex: /ghp_[A-Za-z0-9_]{36,}/g,
         redact: "[GITHUB_PAT_REDACTED]",
         category: "vcs"
     },
     {
         name: "GitHub OAuth Access Token",
-        regex: /gho_[A-Za-z0-9]{36}/g,
+        regex: /gho_[A-Za-z0-9_]{36,}/g,
         redact: "[GITHUB_OAUTH_REDACTED]",
         category: "vcs"
     },
     {
-        name: "GitHub App Token",
-        regex: /(?:ghu|ghs)_[A-Za-z0-9]{36}/g,
-        redact: "[GITHUB_APP_TOKEN_REDACTED]",
+        name: "GitHub User-to-Server Token",
+        regex: /ghu_[A-Za-z0-9_]{36,}/g,
+        redact: "[GITHUB_U2S_TOKEN_REDACTED]",
         category: "vcs"
     },
     {
-        name: "GitHub Fine-grained Token",
-        regex: /github_pat_[A-Za-z0-9]{22}_[A-Za-z0-9]{59}/g,
+        name: "GitHub Server-to-Server Token",
+        regex: /ghs_[A-Za-z0-9_]{36,}/g,
+        redact: "[GITHUB_S2S_TOKEN_REDACTED]",
+        category: "vcs"
+    },
+    {
+        name: "GitHub App Refresh Token",
+        regex: /ghr_[A-Za-z0-9_]{36,}/g,
+        redact: "[GITHUB_REFRESH_TOKEN_REDACTED]",
+        category: "vcs"
+    },
+    {
+        name: "GitHub Fine-grained PAT",
+        regex: /github_pat_[A-Za-z0-9_]{22}_[A-Za-z0-9]{59}/g,
         redact: "[GITHUB_FINE_GRAINED_TOKEN_REDACTED]",
         category: "vcs"
     },
-    {
-        name: "GitHub Classic Token",
-        regex: /ghp_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{82}/g,
-        redact: "[GITHUB_TOKEN_REDACTED]",
-        category: "vcs"
-    },
 
-    // GitLab (vcs)
+    // GitLab (vcs) — expanded per GitLeaks
     {
         name: "GitLab Personal Access Token",
         regex: /glpat-[A-Za-z0-9\-_]{20,}/g,
@@ -74,15 +96,51 @@ const SECRET_PATTERNS = [
         category: "vcs"
     },
     {
-        name: "GitLab Pipeline Token",
+        name: "GitLab Pipeline Trigger Token",
         regex: /glptt-[A-Za-z0-9]{20,}/g,
         redact: "[GITLAB_PIPELINE_TOKEN_REDACTED]",
         category: "vcs"
     },
     {
-        name: "GitLab Runner Token",
+        name: "GitLab Runner Registration Token",
         regex: /GR1348941[A-Za-z0-9\-_]{20,}/g,
         redact: "[GITLAB_RUNNER_TOKEN_REDACTED]",
+        category: "vcs"
+    },
+    {
+        name: "GitLab Deploy Token",
+        regex: /gldt-[A-Za-z0-9\-_]{20,}/g,
+        redact: "[GITLAB_DEPLOY_TOKEN_REDACTED]",
+        category: "vcs"
+    },
+    {
+        name: "GitLab CI Build Token",
+        regex: /glcbt-[A-Za-z0-9]{1,5}_[A-Za-z0-9_-]{20,}/g,
+        redact: "[GITLAB_CI_BUILD_TOKEN_REDACTED]",
+        category: "vcs"
+    },
+    {
+        name: "GitLab Incoming Mail Token",
+        regex: /glimt-[A-Za-z0-9\-_]{25,}/g,
+        redact: "[GITLAB_INCOMING_MAIL_TOKEN_REDACTED]",
+        category: "vcs"
+    },
+    {
+        name: "GitLab Agent Token",
+        regex: /glagent-[A-Za-z0-9\-_]{50,}/g,
+        redact: "[GITLAB_AGENT_TOKEN_REDACTED]",
+        category: "vcs"
+    },
+    {
+        name: "GitLab Feed Token",
+        regex: /glft-[A-Za-z0-9\-_]{20,}/g,
+        redact: "[GITLAB_FEED_TOKEN_REDACTED]",
+        category: "vcs"
+    },
+    {
+        name: "GitLab OAuth App Secret",
+        regex: /gloas-[A-Za-z0-9\-_]{64,}/g,
+        redact: "[GITLAB_OAUTH_SECRET_REDACTED]",
         category: "vcs"
     },
 
@@ -114,6 +172,32 @@ const SECRET_PATTERNS = [
         category: "cloud"
     },
 
+    // IBM / SoftLayer (cloud) — from detect-secrets
+    {
+        name: "IBM Cloud IAM Key",
+        regex: /(?:ibm(?:_|-|)cloud(?:_|-|)iam|cloud(?:_|-|)iam|ibm(?:_|-|)cloud|ibm(?:_|-|)iam|ibm|iam|cloud)[_\-]*(?:api)?[_\-]*(?:key|token|pwd|pass|password)?[\s]*[=:][\s]*['"]?([a-zA-Z0-9_\-]{44})(?![\w\-])['"]?/gi,
+        redact: "[IBM_CLOUD_IAM_KEY_REDACTED]",
+        category: "cloud"
+    },
+    {
+        name: "IBM Cloudant API Key",
+        regex: /(?:cloudant|cl|clou)[_\-]*(?:api)?[_\-]*(?:key|pwd|pw|password|pass|token)[\s]*[=:][\s]*['"]?([a-z]{24})['"]?/gi,
+        redact: "[IBM_CLOUDANT_API_KEY_REDACTED]",
+        category: "cloud"
+    },
+    {
+        name: "IBM Cloudant Password",
+        regex: /(?:cloudant|cl|clou)[_\-]*(?:api)?[_\-]*(?:key|pwd|pw|password|pass|token)[\s]*[=:][\s]*['"]?([0-9a-f]{64})['"]?/gi,
+        redact: "[IBM_CLOUDANT_PASSWORD_REDACTED]",
+        category: "cloud"
+    },
+    {
+        name: "SoftLayer API Key",
+        regex: /(?:softlayer|sl)[_\-]*(?:api)?[_\-]*(?:key|pwd|password|pass|token)[\s]*[=:][\s]*['"]?([a-z0-9]{64})['"]?/gi,
+        redact: "[SOFTLAYER_API_KEY_REDACTED]",
+        category: "cloud"
+    },
+
     // Azure (cloud)
     {
         name: "Azure Storage Account Key",
@@ -128,28 +212,58 @@ const SECRET_PATTERNS = [
         category: "cloud"
     },
 
-    // Slack (communication)
+    // Slack (communication) — expanded per GitLeaks
     {
         name: "Slack Bot Token",
-        regex: /xoxb-[0-9]{10,13}-[0-9]{10,13}-[A-Za-z0-9]{24}/g,
+        regex: /xoxb-[0-9]{10,13}-[0-9]{10,13}[a-zA-Z0-9-]*/g,
         redact: "[SLACK_BOT_TOKEN_REDACTED]",
         category: "communication"
     },
     {
+        name: "Slack Legacy Bot Token",
+        regex: /xoxb-[0-9]{8,14}-[a-zA-Z0-9]{18,26}/g,
+        redact: "[SLACK_LEGACY_BOT_TOKEN_REDACTED]",
+        category: "communication"
+    },
+    {
         name: "Slack User Token",
-        regex: /xoxp-[0-9]{10,13}-[0-9]{10,13}-[0-9]{10,13}-[A-Za-z0-9]{32}/g,
+        regex: /xox[pe](?:-[0-9]{10,13}){3}-[a-zA-Z0-9-]{28,34}/g,
         redact: "[SLACK_USER_TOKEN_REDACTED]",
         category: "communication"
     },
     {
+        name: "Slack Legacy Token",
+        regex: /xox[os]-\d+-\d+-\d+-[a-fA-F\d]+/g,
+        redact: "[SLACK_LEGACY_TOKEN_REDACTED]",
+        category: "communication"
+    },
+    {
+        name: "Slack Legacy Workspace Token",
+        regex: /xox[ar]-(?:\d-)?[0-9a-zA-Z]{8,48}/g,
+        redact: "[SLACK_WORKSPACE_TOKEN_REDACTED]",
+        category: "communication"
+    },
+    {
+        name: "Slack Config Access Token",
+        regex: /xoxe\.xox[bp]-\d-[A-Z0-9]{163,166}/gi,
+        redact: "[SLACK_CONFIG_ACCESS_TOKEN_REDACTED]",
+        category: "communication"
+    },
+    {
+        name: "Slack Config Refresh Token",
+        regex: /xoxe-\d-[A-Z0-9]{146}/gi,
+        redact: "[SLACK_CONFIG_REFRESH_TOKEN_REDACTED]",
+        category: "communication"
+    },
+    {
         name: "Slack Webhook URL",
-        regex: /https:\/\/hooks\.slack\.com\/services\/T[A-Z0-9]{8,}\/B[A-Z0-9]{8,}\/[A-Za-z0-9]{24}/g,
+        regex: /https?:\/\/hooks\.slack\.com\/(?:services|workflows|triggers)\/[A-Za-z0-9+/]{43,56}/g,
         redact: "[SLACK_WEBHOOK_REDACTED]",
         category: "communication"
     },
     {
         name: "Slack App Token",
-        regex: /xapp-[0-9]-[A-Z0-9]+-[0-9]+-[A-Za-z0-9]+/g,
+        regex: /xapp-\d-[A-Z0-9]+-\d+-[a-z0-9]+/gi,
         redact: "[SLACK_APP_TOKEN_REDACTED]",
         category: "communication"
     },
@@ -168,23 +282,27 @@ const SECRET_PATTERNS = [
         category: "communication"
     },
 
-    // Stripe (payment)
+    // Telegram (communication) — from GitLeaks
     {
-        name: "Stripe Live Secret Key",
-        regex: /sk_live_[A-Za-z0-9]{24,}/g,
+        name: "Telegram Bot API Token",
+        regex: /[0-9]{5,16}:A[a-zA-Z0-9_\-]{34}/g,
+        redact: "[TELEGRAM_BOT_TOKEN_REDACTED]",
+        category: "communication"
+    },
+
+    // Microsoft Teams (communication) — from GitLeaks
+    {
+        name: "Microsoft Teams Webhook",
+        regex: /https:\/\/[a-z0-9]+\.webhook\.office\.com\/webhookb2\/[a-z0-9-]+@[a-z0-9-]+\/IncomingWebhook\/[a-z0-9]+\/[a-z0-9-]+/gi,
+        redact: "[TEAMS_WEBHOOK_REDACTED]",
+        category: "communication"
+    },
+
+    // Stripe (payment) — consolidated per GitLeaks
+    {
+        name: "Stripe Secret / Restricted Key",
+        regex: /(?:sk|rk)_(?:test|live|prod)_[a-zA-Z0-9]{10,99}/g,
         redact: "[STRIPE_SECRET_KEY_REDACTED]",
-        category: "payment"
-    },
-    {
-        name: "Stripe Test Secret Key",
-        regex: /sk_test_[A-Za-z0-9]{24,}/g,
-        redact: "[STRIPE_TEST_KEY_REDACTED]",
-        category: "payment"
-    },
-    {
-        name: "Stripe Restricted Key",
-        regex: /rk_live_[A-Za-z0-9]{24,}/g,
-        redact: "[STRIPE_RESTRICTED_KEY_REDACTED]",
         category: "payment"
     },
     {
@@ -202,10 +320,10 @@ const SECRET_PATTERNS = [
         category: "payment"
     },
 
-    // Square (payment)
+    // Square (payment) — improved per GitLeaks
     {
         name: "Square Access Token",
-        regex: /sq0atp-[A-Za-z0-9\-_]{22}/g,
+        regex: /(?:EAAA|sq0atp-)[\w-]{22,60}/g,
         redact: "[SQUARE_ACCESS_TOKEN_REDACTED]",
         category: "payment"
     },
@@ -213,6 +331,14 @@ const SECRET_PATTERNS = [
         name: "Square OAuth Secret",
         regex: /sq0csp-[A-Za-z0-9\-_]{43}/g,
         redact: "[SQUARE_OAUTH_SECRET_REDACTED]",
+        category: "payment"
+    },
+
+    // Plaid (payment) — from GitLeaks
+    {
+        name: "Plaid API Token",
+        regex: /access-(?:sandbox|development|production)-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g,
+        redact: "[PLAID_API_TOKEN_REDACTED]",
         category: "payment"
     },
 
@@ -270,7 +396,7 @@ const SECRET_PATTERNS = [
         category: "apiKeys"
     },
 
-    // Shopify (apiKeys)
+    // Shopify (apiKeys) — expanded per GitLeaks
     {
         name: "Shopify Access Token",
         regex: /shpat_[a-fA-F0-9]{32}/g,
@@ -287,6 +413,12 @@ const SECRET_PATTERNS = [
         name: "Shopify Private App Token",
         regex: /shppa_[a-fA-F0-9]{32}/g,
         redact: "[SHOPIFY_PRIVATE_APP_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+    {
+        name: "Shopify Shared Secret",
+        regex: /shpss_[a-fA-F0-9]{32}/g,
+        redact: "[SHOPIFY_SHARED_SECRET_REDACTED]",
         category: "apiKeys"
     },
 
@@ -368,6 +500,20 @@ const SECRET_PATTERNS = [
         category: "database"
     },
 
+    // Artifactory (ci_cd) — from detect-secrets
+    {
+        name: "Artifactory API Token",
+        regex: /(?:\s|=|:|"|^)AKC[a-zA-Z0-9]{10,}(?:\s|"|$)/g,
+        redact: "[ARTIFACTORY_API_TOKEN_REDACTED]",
+        category: "ci_cd"
+    },
+    {
+        name: "Artifactory Password",
+        regex: /(?:\s|=|:|"|^)AP[\dABCDEF][a-zA-Z0-9]{8,}(?:\s|"|$)/g,
+        redact: "[ARTIFACTORY_PASSWORD_REDACTED]",
+        category: "ci_cd"
+    },
+
     // Generic Password Patterns (generic)
     {
         name: "Password in Assignment",
@@ -428,27 +574,75 @@ const SECRET_PATTERNS = [
         category: "apiKeys"
     },
 
-    // Anthropic (apiKeys)
+    // Anthropic (ai_ml) — from GitLeaks
     {
         name: "Anthropic API Key",
-        regex: /sk-ant-api[0-9]{2}-[A-Za-z0-9\-_]{86}/g,
+        regex: /sk-ant-api[0-9]{2}-[A-Za-z0-9\-_]{86,}/g,
         redact: "[ANTHROPIC_API_KEY_REDACTED]",
-        category: "apiKeys"
+        category: "ai_ml"
     },
 
-    // OpenAI (apiKeys)
+    // OpenAI (ai_ml) — improved per GitLeaks (covers sk-proj-, sk-svcacct-, sk-admin-)
     {
-        name: "OpenAI API Key",
-        regex: /sk-[A-Za-z0-9]{48}/g,
+        name: "OpenAI API Key (Project/Service/Admin)",
+        regex: /sk-(?:proj|svcacct|admin)-[A-Za-z0-9_-]{48,180}/g,
         redact: "[OPENAI_API_KEY_REDACTED]",
-        category: "apiKeys"
+        category: "ai_ml"
+    },
+    {
+        name: "OpenAI API Key (Legacy)",
+        regex: /sk-[A-Za-z0-9]{20}T3BlbkFJ[A-Za-z0-9]{20}/g,
+        redact: "[OPENAI_API_KEY_REDACTED]",
+        category: "ai_ml"
     },
 
-    // Datadog (apiKeys)
+    // HuggingFace (ai_ml) — from GitLeaks
+    {
+        name: "HuggingFace Access Token",
+        regex: /hf_[a-zA-Z]{34}/g,
+        redact: "[HUGGINGFACE_TOKEN_REDACTED]",
+        category: "ai_ml"
+    },
+    {
+        name: "HuggingFace Organization API Token",
+        regex: /api_org_[a-zA-Z]{34}/gi,
+        redact: "[HUGGINGFACE_ORG_TOKEN_REDACTED]",
+        category: "ai_ml"
+    },
+
+    // Replicate (ai_ml)
+    {
+        name: "Replicate API Token",
+        regex: /r8_[A-Za-z0-9]{38}/g,
+        redact: "[REPLICATE_API_TOKEN_REDACTED]",
+        category: "ai_ml"
+    },
+
+    // Perplexity (ai_ml) — from GitLeaks
+    {
+        name: "Perplexity API Key",
+        regex: /pplx-[a-zA-Z0-9]{48}/g,
+        redact: "[PERPLEXITY_API_KEY_REDACTED]",
+        category: "ai_ml"
+    },
+
+    // Datadog (apiKeys) — improved per GitLeaks
     {
         name: "Datadog API Key",
-        regex: /(?:datadog|dd)(?:[_\-\s]*(?:api)?[_\-\s]*key)[\s]*[=:][\s]*['"]?([a-f0-9]{32})['"]?/gi,
+        regex: /(?:datadog|dd)(?:[_\-\s]*(?:api)?[_\-\s]*key)[\s]*[=:][\s]*['"]?([a-f0-9]{32,40})['"]?/gi,
         redact: "[DATADOG_API_KEY_REDACTED]",
+        category: "apiKeys"
+    },
+    {
+        name: "Datadog Access Token",
+        regex: /(?:datadog)(?:[_\-\s]*(?:access)?[_\-\s]*(?:token|key))[\s]*[=:][\s]*['"]?([a-z0-9]{40})['"]?/gi,
+        redact: "[DATADOG_ACCESS_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+    {
+        name: "Datadog App Key",
+        regex: /(?:datadog|dd)(?:[_\-\s]*(?:app(?:lication)?)?[_\-\s]*key)[\s]*[=:][\s]*['"]?([a-f0-9]{40})['"]?/gi,
+        redact: "[DATADOG_APP_KEY_REDACTED]",
         category: "apiKeys"
     },
 
@@ -491,6 +685,12 @@ const SECRET_PATTERNS = [
         redact: "[CLOUDFLARE_API_TOKEN_REDACTED]",
         category: "apiKeys"
     },
+    {
+        name: "Cloudflare Global API Key",
+        regex: /(?:cloudflare|cf)(?:[_\-\s]*(?:global)?[_\-\s]*(?:api)?[_\-\s]*key)[\s]*[=:][\s]*['"]?([a-f0-9]{37})['"]?/gi,
+        redact: "[CLOUDFLARE_GLOBAL_API_KEY_REDACTED]",
+        category: "apiKeys"
+    },
 
     // DigitalOcean (apiKeys)
     {
@@ -499,28 +699,58 @@ const SECRET_PATTERNS = [
         redact: "[DIGITALOCEAN_ACCESS_TOKEN_REDACTED]",
         category: "apiKeys"
     },
-
-    // Vault (apiKeys)
     {
-        name: "HashiCorp Vault Token",
+        name: "DigitalOcean OAuth Token",
+        regex: /doo_v1_[a-f0-9]{64}/g,
+        redact: "[DIGITALOCEAN_OAUTH_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+    {
+        name: "DigitalOcean Refresh Token",
+        regex: /dor_v1_[a-f0-9]{64}/g,
+        redact: "[DIGITALOCEAN_REFRESH_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+
+    // Vault (apiKeys) — expanded per GitLeaks
+    {
+        name: "HashiCorp Vault Service Token",
         regex: /hvs\.[A-Za-z0-9_-]{24,}/g,
-        redact: "[VAULT_TOKEN_REDACTED]",
+        redact: "[VAULT_SERVICE_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+    {
+        name: "HashiCorp Vault Batch Token",
+        regex: /hvb\.[A-Za-z0-9_-]{138,300}/g,
+        redact: "[VAULT_BATCH_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+    {
+        name: "HashiCorp Terraform API Token",
+        regex: /[a-z0-9]{14}\.atlasv1\.[a-z0-9\-_=]{60,70}/gi,
+        redact: "[TERRAFORM_API_TOKEN_REDACTED]",
         category: "apiKeys"
     },
 
     // Linear (apiKeys)
     {
         name: "Linear API Key",
-        regex: /lin_api_[A-Za-z0-9]{40}/g,
+        regex: /lin_api_[A-Za-z0-9]{40}/gi,
         redact: "[LINEAR_API_KEY_REDACTED]",
         category: "apiKeys"
     },
 
-    // Notion (apiKeys)
+    // Notion (apiKeys) — updated per GitLeaks
     {
-        name: "Notion Integration Token",
+        name: "Notion Integration Token (Legacy)",
         regex: /secret_[A-Za-z0-9]{43}/g,
         redact: "[NOTION_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+    {
+        name: "Notion API Token",
+        regex: /ntn_[0-9]{11}[A-Za-z0-9]{35}/g,
+        redact: "[NOTION_API_TOKEN_REDACTED]",
         category: "apiKeys"
     },
 
@@ -546,6 +776,246 @@ const SECRET_PATTERNS = [
         regex: /(?:netlify)(?:[_\-\s]*(?:access)?[_\-\s]*token)[\s]*[=:][\s]*['"]?([A-Za-z0-9\-_]{40,})['"]?/gi,
         redact: "[NETLIFY_ACCESS_TOKEN_REDACTED]",
         category: "apiKeys"
+    },
+
+    // Grafana (apiKeys) — from GitLeaks
+    {
+        name: "Grafana API Key / Token",
+        regex: /glc_[A-Za-z0-9+/]{32,400}={0,3}/g,
+        redact: "[GRAFANA_API_KEY_REDACTED]",
+        category: "apiKeys"
+    },
+    {
+        name: "Grafana Service Account Token",
+        regex: /glsa_[A-Za-z0-9]{32}_[A-Fa-f0-9]{8}/g,
+        redact: "[GRAFANA_SA_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+
+    // PlanetScale (database) — from GitLeaks
+    {
+        name: "PlanetScale API Token",
+        regex: /pscale_tkn_[A-Za-z0-9=._-]{32,64}/gi,
+        redact: "[PLANETSCALE_API_TOKEN_REDACTED]",
+        category: "database"
+    },
+    {
+        name: "PlanetScale OAuth Token",
+        regex: /pscale_oauth_[A-Za-z0-9=._-]{32,64}/g,
+        redact: "[PLANETSCALE_OAUTH_TOKEN_REDACTED]",
+        category: "database"
+    },
+    {
+        name: "PlanetScale Password",
+        regex: /pscale_pw_[A-Za-z0-9=._-]{32,64}/gi,
+        redact: "[PLANETSCALE_PASSWORD_REDACTED]",
+        category: "database"
+    },
+
+    // Postman (apiKeys) — from GitLeaks
+    {
+        name: "Postman API Token",
+        regex: /PMAK-[a-f0-9]{24}-[a-f0-9]{34}/gi,
+        redact: "[POSTMAN_API_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+
+    // Prefect (apiKeys) — from GitLeaks
+    {
+        name: "Prefect API Token",
+        regex: /pnu_[a-zA-Z0-9]{36}/g,
+        redact: "[PREFECT_API_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+
+    // Pulumi (apiKeys) — from GitLeaks
+    {
+        name: "Pulumi API Token",
+        regex: /pul-[a-f0-9]{40}/g,
+        redact: "[PULUMI_API_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+
+    // Rubygems (apiKeys) — from GitLeaks
+    {
+        name: "Rubygems API Token",
+        regex: /rubygems_[a-f0-9]{48}/g,
+        redact: "[RUBYGEMS_API_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+
+    // Brevo / Sendinblue (apiKeys) — from GitLeaks
+    {
+        name: "Brevo / Sendinblue API Token",
+        regex: /xkeysib-[a-f0-9]{64}-[a-zA-Z0-9]{16}/g,
+        redact: "[BREVO_API_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+
+    // Mailgun (apiKeys) — from GitLeaks
+    {
+        name: "Mailgun Private API Token",
+        regex: /key-[a-f0-9]{32}/g,
+        redact: "[MAILGUN_API_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+    {
+        name: "Mailgun Public Validation Key",
+        regex: /pubkey-[a-f0-9]{32}/g,
+        redact: "[MAILGUN_PUB_KEY_REDACTED]",
+        category: "apiKeys"
+    },
+
+    // Shippo (apiKeys) — from GitLeaks
+    {
+        name: "Shippo API Token",
+        regex: /shippo_(?:live|test)_[a-fA-F0-9]{40}/g,
+        redact: "[SHIPPO_API_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+
+    // Snyk (apiKeys) — from GitLeaks
+    {
+        name: "Snyk API Token",
+        regex: /(?:snyk[_.-]?(?:(?:api|oauth)[_.-]?)?(?:key|token))[\s]*[=:][\s]*['"]?([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})['"]?/gi,
+        redact: "[SNYK_API_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+
+    // Doppler (apiKeys) — from TruffleHog
+    {
+        name: "Doppler API Token",
+        regex: /dp\.(?:ct|pt|st|sa|scim|audit)\.[A-Za-z0-9]{40,44}/g,
+        redact: "[DOPPLER_API_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+
+    // Infracost (apiKeys) — from GitLeaks
+    {
+        name: "Infracost API Token",
+        regex: /ico-[a-zA-Z0-9]{32}/g,
+        redact: "[INFRACOST_API_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+
+    // Confluent (apiKeys) — from TruffleHog
+    {
+        name: "Confluent Secret Key",
+        regex: /(?:confluent)(?:[_\-\s]*(?:secret)?[_\-\s]*key)[\s]*[=:][\s]*['"]?([A-Za-z0-9/+=]{64})['"]?/gi,
+        redact: "[CONFLUENT_SECRET_KEY_REDACTED]",
+        category: "apiKeys"
+    },
+
+    // Databricks (apiKeys)
+    {
+        name: "Databricks API Token",
+        regex: /dapi[a-f0-9]{32}/g,
+        redact: "[DATABRICKS_API_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+
+    // Figma (apiKeys)
+    {
+        name: "Figma Personal Access Token",
+        regex: /figd_[A-Za-z0-9_-]{40,}/g,
+        redact: "[FIGMA_PAT_REDACTED]",
+        category: "apiKeys"
+    },
+
+    // Airtable (apiKeys)
+    {
+        name: "Airtable API Key",
+        regex: /(?:airtable)(?:[_\-\s]*(?:api)?[_\-\s]*key)[\s]*[=:][\s]*['"]?([A-Za-z0-9]{14,17})['"]?/gi,
+        redact: "[AIRTABLE_API_KEY_REDACTED]",
+        category: "apiKeys"
+    },
+
+    // Contentful (apiKeys)
+    {
+        name: "Contentful Delivery API Token",
+        regex: /(?:contentful)(?:[_\-\s]*(?:delivery|preview|management)?[_\-\s]*(?:api)?[_\-\s]*(?:token|key))[\s]*[=:][\s]*['"]?([A-Za-z0-9\-_]{43,64})['"]?/gi,
+        redact: "[CONTENTFUL_API_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+
+    // Okta (apiKeys) — from GitLeaks
+    {
+        name: "Okta Access Token",
+        regex: /(?:okta|OKTA)(?:[_\-\s]*(?:api)?[_\-\s]*(?:token|key|secret))[\s]*[=:][\s]*['"]?(00[A-Za-z0-9=_-]{40,})['"]?/g,
+        redact: "[OKTA_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+
+    // Auth0 (apiKeys)
+    {
+        name: "Auth0 Management API Token",
+        regex: /(?:auth0)(?:[_\-\s]*(?:management|api)?[_\-\s]*(?:token|secret|key))[\s]*[=:][\s]*['"]?([A-Za-z0-9\-_]{30,})['"]?/gi,
+        redact: "[AUTH0_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+
+    // Mapbox (apiKeys) — from GitLeaks
+    {
+        name: "Mapbox API Token",
+        regex: /pk\.[a-z0-9]{60}\.[a-z0-9]{22}/g,
+        redact: "[MAPBOX_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+
+    // Twitch (apiKeys) — from GitLeaks
+    {
+        name: "Twitch API Token",
+        regex: /(?:twitch)(?:[_\-\s]*(?:api)?[_\-\s]*(?:token|key|secret))[\s]*[=:][\s]*['"]?([a-z0-9]{30})['"]?/gi,
+        redact: "[TWITCH_API_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+
+    // Readme (apiKeys) — from GitLeaks
+    {
+        name: "Readme API Token",
+        regex: /rdme_[a-z0-9]{70}/g,
+        redact: "[README_API_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+
+    // CircleCI (ci_cd) — from GitLeaks
+    {
+        name: "CircleCI Personal API Token",
+        regex: /(?:circle)(?:[_\-\s]*(?:ci)?[_\-\s]*(?:token|key))[\s]*[=:][\s]*['"]?([a-f0-9]{40})['"]?/gi,
+        redact: "[CIRCLECI_TOKEN_REDACTED]",
+        category: "ci_cd"
+    },
+
+    // Drone CI (ci_cd)
+    {
+        name: "Drone CI Token",
+        regex: /(?:drone)(?:[_\-\s]*(?:token|key|secret))[\s]*[=:][\s]*['"]?([A-Za-z0-9]{32,})['"]?/gi,
+        redact: "[DRONE_CI_TOKEN_REDACTED]",
+        category: "ci_cd"
+    },
+
+    // Travis CI (ci_cd) — from GitLeaks
+    {
+        name: "Travis CI Token",
+        regex: /(?:travis)(?:[_\-\s]*(?:ci)?[_\-\s]*(?:token|key))[\s]*[=:][\s]*['"]?([a-z0-9]{22})['"]?/gi,
+        redact: "[TRAVISCI_TOKEN_REDACTED]",
+        category: "ci_cd"
+    },
+
+    // Azure DevOps (ci_cd)
+    {
+        name: "Azure DevOps PAT",
+        regex: /(?:azure[_\-\s]*devops|ado|vsts)(?:[_\-\s]*(?:pat|token|key))[\s]*[=:][\s]*['"]?([A-Za-z0-9]{52,})['"]?/gi,
+        redact: "[AZURE_DEVOPS_PAT_REDACTED]",
+        category: "ci_cd"
+    },
+
+    // Scalingo (ci_cd) — from GitLeaks
+    {
+        name: "Scalingo API Token",
+        regex: /tk-us-[A-Za-z0-9_-]{48}/g,
+        redact: "[SCALINGO_API_TOKEN_REDACTED]",
+        category: "ci_cd"
     },
 
     // Base64 encoded secrets (generic)

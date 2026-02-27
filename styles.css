@@ -55,7 +55,11 @@ body {
 /* Header */
 header {
     margin-bottom: 60px;
-    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
     border-bottom: 4px solid var(--border-color);
     padding-bottom: 30px;
 }
@@ -63,8 +67,40 @@ header {
 .logo {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     gap: 16px;
+}
+
+.logo-text {
+    text-align: left;
+}
+
+/* GitHub Link in Header */
+.github-header-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: 3px solid var(--border-color);
+    background: var(--bg-panel);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    box-shadow: 4px 4px 0 #000;
+    transition: all 0.1s;
+}
+
+.github-header-link:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 #000;
+}
+
+.github-header-link:hover {
+    background: #000;
+    color: #fff;
 }
 
 .logo-icon {

@@ -5,6 +5,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Secret Remover</title>
+    <!-- Social Preview Meta Tags -->
+    <meta name="description"
+        content="A fast, 100% client-side web application to locally scan and remove hardcoded secrets from your codebase.">
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://secretremover.com/">
+    <meta property="og:title" content="Secret Remover">
+    <meta property="og:description"
+        content="A fast, 100% client-side web application to locally scan and remove hardcoded secrets from your codebase before sharing.">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary">
+    <meta property="twitter:url" content="https://secretremover.com/">
+    <meta property="twitter:title" content="Secret Remover">
+    <meta property="twitter:description"
+        content="A fast, 100% client-side web application to locally scan and remove hardcoded secrets from your codebase before sharing.">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,6 +42,16 @@
                     <p class="tagline">Protect your code • Remove secrets • Share safely</p>
                 </div>
             </div>
+            <a href="https://github.com/akashc99/secretremover" target="_blank" rel="noopener noreferrer"
+                class="github-header-link" title="View Source on GitHub">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+                    </path>
+                </svg>
+                <span>GitHub</span>
+            </a>
         </header>
 
         <main>
@@ -53,9 +80,20 @@
                 </div>
             </section>
 
-            <div class="trust-badges"
-                style="text-align: center; margin-bottom: 40px; font-family: 'Inter', sans-serif; font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted);">
-                Client-Side Only · Open Source · Secure &amp; Private
+            <div
+                style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; margin-bottom: 40px; margin-top: 10px;">
+                <div
+                    style="display: inline-flex; align-items: center; gap: 10px; padding: 8px 20px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 100px; backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+                    <span
+                        style="color: transparent; text-shadow: 0 0 0 black; font-size: 1.1rem; filter: drop-shadow(0 0 2px rgba(255,255,255,0.2));">🔒</span>
+                    <span
+                        style="font-family: 'Inter', sans-serif; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-primary);">100%
+                        Client-Side Scanning</span>
+                </div>
+                <span
+                    style="font-family: 'Inter', sans-serif; font-size: 0.85rem; color: var(--text-muted); text-align: center; max-width: 450px; line-height: 1.6;">
+                    All scanning happens locally in your browser.<br>No data is uploaded.
+                </span>
             </div>
 
             <!-- Scanning Section -->
@@ -177,7 +215,9 @@
                                     <span class="btn-content">📄 Export JSON</span>
                                 </button>
                                 <button id="exportCsvBtn" class="btn secondary">
-                                    <span class="btn-content">📊 Export CSV</span>
+                                    <span class="btn-content"><span
+                                            style="color: transparent; text-shadow: 0 0 0 black;">📊</span> Export
+                                        CSV</span>
                                 </button>
                             </div>
                         </div>

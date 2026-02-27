@@ -24,7 +24,7 @@ As AI-assisted coding and automated code reviews become the norm, it's easier th
 
 - **100% Client-Side:** No backend, no servers, zero data retention. High security and privacy.
 - **Drag & Drop UI:** Simply drop a `.zip` of your source code into the browser.
-- **Comprehensive Scanning:** Detects 85+ distinct types of secrets (AWS keys, GitHub tokens, passwords, Slack webhooks, etc.) and uses Shannon entropy targeting for unknown high-entropy keys.
+- **Comprehensive Scanning:** Detects 140+ distinct types of secrets (AWS keys, GitHub tokens, IBM Cloud IAM, passwords, Slack webhooks, etc.) using industry-standard patterns from GitLeaks, TruffleHog, and Yelp/detect-secrets, alongside Shannon entropy targeting for unknown high-entropy keys.
 - **Selective Redaction:** Review all findings and choose exactly which secrets to redact or keep.
 - **Custom Keywords:** Add specific keywords or Custom Regex (e.g. `password1|password2`) to re-scan locally.
 - **Smart Remediation:** Downloads a perfectly sanitized identical `.zip` replica of your source code with all selected secrets replaced by safe redacted placeholders.
@@ -70,7 +70,7 @@ Then visit `http://localhost:8080` in your web browser.
 ├── index.html      # Main application interface
 ├── 404.html        # Custom "Not Found" magnifier page
 ├── app.js          # Core scanning logic, UI state, and Zip generation
-├── patterns.js     # Dictionary of 85+ Regular Expressions and Secrets
+├── patterns.js     # Dictionary of 140+ Regular Expressions and Secrets
 ├── styles.css      # E-ink themed styling 
 └── favicon.svg     # Clean magnifier icon
 ```
@@ -80,3 +80,15 @@ Then visit `http://localhost:8080` in your web browser.
 ## 🛡️ License
 
 This project is open-source and available under the [MIT License](LICENSE).
+
+---
+
+## 🙏 Acknowledgments 
+
+The secret detection patterns used in this project were deeply inspired by and curated from the following incredible open-source security projects:
+
+- **[GitLeaks](https://github.com/gitleaks/gitleaks)** by Zachary Rice
+- **[TruffleHog](https://github.com/trufflesecurity/trufflehog)** by Truffle Security
+- **[detect-secrets](https://github.com/Yelp/detect-secrets)** by Yelp
+
+We highly respect their research and contributions to the open-source security community.
