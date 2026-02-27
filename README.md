@@ -16,7 +16,7 @@ As AI-assisted coding and automated code reviews become the norm, it's easier th
 
 **Your code never leaves your computer.** Everything is processed locally via browser-based JavaScript using regex pattern matching and entropy analysis.
 
-![Secret Remover Demo](demo.gif1)
+![Secret Remover Demo](demo.gif)
 
 ---
 
