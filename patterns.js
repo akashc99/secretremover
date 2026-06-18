@@ -20,6 +20,8 @@ const PATTERN_CATEGORIES = {
     vcs: { name: "Version Control", description: "GitHub, GitLab, Bitbucket tokens", enabled: true },
     communication: { name: "Communication", description: "Slack, Discord, Telegram, Teams webhooks & tokens", enabled: true },
     payment: { name: "Payment", description: "Stripe, PayPal, Square, Plaid keys", enabled: true },
+    payment_india: { name: "Payment (India)", description: "Razorpay, Paytm, PhonePe, PayU, CCAvenue, Cashfree, Instamojo, Juspay keys", enabled: true },
+    sms_india: { name: "SMS & Comms (India)", description: "MSG91, Gupshup, Textlocal, Karix auth keys", enabled: true },
     database: { name: "Database", description: "Connection strings with credentials", enabled: true },
     privateKeys: { name: "Private Keys", description: "RSA, SSH, PGP private keys", enabled: true },
     apiKeys: { name: "API Keys", description: "Various service API keys", enabled: true },
@@ -340,6 +342,195 @@ const SECRET_PATTERNS = [
         regex: /access-(?:sandbox|development|production)-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g,
         redact: "[PLAID_API_TOKEN_REDACTED]",
         category: "payment"
+    },
+
+    // ==========================================================================
+    // INDIAN PAYMENT PROVIDERS (payment_india)
+    // Razorpay, Paytm, PhonePe, PayU, CCAvenue, Cashfree, Instamojo, Juspay.
+    // Providers without distinctive prefixes (Paytm, PayU, PhonePe, CCAvenue)
+    // are matched via keyword + value context. Verify length assumptions
+    // against sandbox keys from each provider dashboard before tightening.
+    // ==========================================================================
+
+    // Razorpay
+    {
+        name: "Razorpay Key ID",
+        regex: /rzp_(?:test|live)_[A-Za-z0-9]{14}/g,
+        redact: "[RAZORPAY_KEY_ID_REDACTED]",
+        category: "payment_india"
+    },
+    {
+        name: "Razorpay Key Secret",
+        regex: /(?:razorpay[_\-]?(?:key[_\-]?)?secret)[\s]*[=:][\s]*['"]?([A-Za-z0-9]{20,})['"]?/gi,
+        redact: "[RAZORPAY_KEY_SECRET_REDACTED]",
+        category: "payment_india"
+    },
+    {
+        name: "Razorpay Webhook Secret",
+        regex: /(?:razorpay[_\-]?webhook[_\-]?secret)[\s]*[=:][\s]*['"]?([A-Za-z0-9_@#\-]{10,})['"]?/gi,
+        redact: "[RAZORPAY_WEBHOOK_SECRET_REDACTED]",
+        category: "payment_india"
+    },
+
+    // Paytm
+    {
+        name: "Paytm Merchant Key / MID",
+        regex: /(?:paytm[_\-]?(?:merchant[_\-]?)?(?:key|mid|secret))[\s]*[=:][\s]*['"]?([A-Za-z0-9@#%&!]{12,32})['"]?/gi,
+        redact: "[PAYTM_MERCHANT_KEY_REDACTED]",
+        category: "payment_india"
+    },
+    {
+        name: "Paytm Checksum Key",
+        regex: /(?:paytm[_\-]?checksum[_\-]?(?:hash[_\-]?)?key)[\s]*[=:][\s]*['"]?([A-Za-z0-9@#%&!]{12,32})['"]?/gi,
+        redact: "[PAYTM_CHECKSUM_KEY_REDACTED]",
+        category: "payment_india"
+    },
+
+    // PhonePe
+    {
+        name: "PhonePe Salt Key",
+        regex: /(?:phonepe[_\-]?)?salt[_\-]?key[\s]*[=:][\s]*['"]?([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})['"]?/gi,
+        redact: "[PHONEPE_SALT_KEY_REDACTED]",
+        category: "payment_india"
+    },
+
+    // PayU
+    {
+        name: "PayU Merchant Key / Salt",
+        regex: /(?:payu[_\-]?(?:merchant[_\-]?)?(?:key|salt))[\s]*[=:][\s]*['"]?([A-Za-z0-9]{6,16})['"]?/gi,
+        redact: "[PAYU_KEY_REDACTED]",
+        category: "payment_india"
+    },
+
+    // CCAvenue
+    {
+        name: "CCAvenue Working Key",
+        regex: /(?:ccavenue[_\-]?)?working[_\-]?key[\s]*[=:][\s]*['"]?([A-F0-9]{32})['"]?/gi,
+        redact: "[CCAVENUE_WORKING_KEY_REDACTED]",
+        category: "payment_india"
+    },
+    {
+        name: "CCAvenue Access Code",
+        regex: /access[_\-]?code[\s]*[=:][\s]*['"]?(AV[A-Z0-9]{10,14})['"]?/gi,
+        redact: "[CCAVENUE_ACCESS_CODE_REDACTED]",
+        category: "payment_india"
+    },
+
+    // Cashfree
+    {
+        name: "Cashfree Secret Key",
+        regex: /cfsk_ma_(?:test|prod)_[A-Za-z0-9]+_[A-Za-z0-9]+/g,
+        redact: "[CASHFREE_SECRET_KEY_REDACTED]",
+        category: "payment_india"
+    },
+    {
+        name: "Cashfree App ID",
+        regex: /(?:cashfree[_\-]?)?app[_\-]?id[\s]*[=:][\s]*['"]?(CF\d{5,}[A-Z0-9]{10,})['"]?/gi,
+        redact: "[CASHFREE_APP_ID_REDACTED]",
+        category: "payment_india"
+    },
+
+    // Instamojo
+    {
+        name: "Instamojo API Key / Auth Token",
+        regex: /(?:instamojo[_\-]?(?:api[_\-]?key|auth[_\-]?token))[\s]*[=:][\s]*['"]?([a-f0-9]{32,40})['"]?/gi,
+        redact: "[INSTAMOJO_KEY_REDACTED]",
+        category: "payment_india"
+    },
+
+    // Juspay / HyperSDK
+    {
+        name: "Juspay API Key",
+        regex: /(?:juspay[_\-]?(?:api[_\-]?)?key)[\s]*[=:][\s]*['"]?([A-Za-z0-9]{20,64})['"]?/gi,
+        redact: "[JUSPAY_API_KEY_REDACTED]",
+        category: "payment_india"
+    },
+    {
+        name: "Juspay Merchant ID / Key",
+        regex: /(?:juspay[_\-]?merchant[_\-]?(?:id|key))[\s]*[=:][\s]*['"]?([A-Za-z0-9_\-]{8,40})['"]?/gi,
+        redact: "[JUSPAY_MERCHANT_REDACTED]",
+        category: "payment_india"
+    },
+    {
+        name: "HyperSDK Client / Payload Key",
+        regex: /(?:hyper[_\-]?sdk[_\-]?(?:client[_\-]?id|payload[_\-]?(?:key|signature[_\-]?key)))[\s]*[=:][\s]*['"]?([A-Za-z0-9_\-]{16,64})['"]?/gi,
+        redact: "[HYPERSDK_KEY_REDACTED]",
+        category: "payment_india"
+    },
+    {
+        name: "Juspay EC Signature Key",
+        regex: /(?:juspay[_\-]?(?:ec[_\-]?)?signature[_\-]?(?:private[_\-]?)?key)[\s]*[=:][\s]*['"]?([A-Za-z0-9+/=_\-]{24,})['"]?/gi,
+        redact: "[JUSPAY_SIGNATURE_KEY_REDACTED]",
+        category: "payment_india"
+    },
+
+    // ==========================================================================
+    // INDIAN SMS & COMMUNICATION PROVIDERS (sms_india)
+    // MSG91, Gupshup, Textlocal, Karix
+    // ==========================================================================
+
+    // MSG91
+    {
+        name: "MSG91 Auth Key",
+        regex: /(?:msg91[_\-]?)?auth[_\-]?key[\s]*[=:][\s]*['"]?(\d{6}[A-Za-z0-9]{14,28})['"]?/gi,
+        redact: "[MSG91_AUTH_KEY_REDACTED]",
+        category: "sms_india"
+    },
+
+    // Gupshup
+    {
+        name: "Gupshup API Key",
+        regex: /(?:gupshup[_\-]?(?:api[_\-]?key|apikey))[\s]*[=:][\s]*['"]?([a-f0-9]{32})['"]?/gi,
+        redact: "[GUPSHUP_API_KEY_REDACTED]",
+        category: "sms_india"
+    },
+    {
+        name: "Gupshup App Token / Secret",
+        regex: /(?:gupshup[_\-]?(?:app[_\-]?)?(?:token|secret|password))[\s]*[=:][\s]*['"]?([A-Za-z0-9_\-]{16,64})['"]?/gi,
+        redact: "[GUPSHUP_TOKEN_REDACTED]",
+        category: "sms_india"
+    },
+
+    // Textlocal
+    {
+        name: "Textlocal API Key",
+        regex: /(?:textlocal[_\-]?(?:api[_\-]?key|apikey))[\s]*[=:][\s]*['"]?([A-Za-z0-9+/]{20,48}={0,2})['"]?/gi,
+        redact: "[TEXTLOCAL_API_KEY_REDACTED]",
+        category: "sms_india"
+    },
+    {
+        name: "Textlocal Hash",
+        regex: /(?:textlocal[_\-]?hash)[\s]*[=:][\s]*['"]?([a-f0-9]{40,64})['"]?/gi,
+        redact: "[TEXTLOCAL_HASH_REDACTED]",
+        category: "sms_india"
+    },
+
+    // Karix
+    {
+        name: "Karix API Token",
+        regex: /(?:karix[_\-]?(?:api[_\-]?token|auth[_\-]?token|token))[\s]*[=:][\s]*['"]?([A-Za-z0-9_\-]{20,48})['"]?/gi,
+        redact: "[KARIX_API_TOKEN_REDACTED]",
+        category: "sms_india"
+    },
+    {
+        name: "Karix API ID / SID",
+        regex: /(?:karix[_\-]?(?:api[_\-]?id|sid))[\s]*[=:][\s]*['"]?([A-Za-z0-9\-]{12,40})['"]?/gi,
+        redact: "[KARIX_API_ID_REDACTED]",
+        category: "sms_india"
+    },
+
+    // Zoho (apiKeys) — Indian SaaS, distinctive token format
+    {
+        name: "Zoho OAuth Token",
+        regex: /1000\.[a-f0-9]{32}\.[a-f0-9]{32}/g,
+        redact: "[ZOHO_OAUTH_TOKEN_REDACTED]",
+        category: "apiKeys"
+    },
+    {
+        name: "Zoho Client Secret",
+        regex: /(?:zoho[_\-]?client[_\-]?secret)[\s]*[=:][\s]*['"]?([a-f0-9]{40,})['"]?/gi,
+        redact: "[ZOHO_CLIENT_SECRET_REDACTED]",
+        category: "apiKeys"
     },
 
     // Twilio (apiKeys)

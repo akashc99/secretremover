@@ -305,6 +305,76 @@ h3 {
     border: 1px solid #000;
 }
 
+/* Scanner Visual (concentric e-ink rings) */
+.scanner-visual {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.scan-ring {
+    position: absolute;
+    border: 3px solid var(--border-color);
+    border-radius: 50%;
+    animation: scanPulse 1.8s steps(6) infinite;
+}
+
+.ring-1 {
+    width: 120px;
+    height: 120px;
+    animation-delay: 0s;
+}
+
+.ring-2 {
+    width: 84px;
+    height: 84px;
+    animation-delay: 0.3s;
+}
+
+.ring-3 {
+    width: 48px;
+    height: 48px;
+    animation-delay: 0.6s;
+}
+
+@keyframes scanPulse {
+    0% {
+        transform: scale(0.7);
+        opacity: 0.15;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1.05);
+        opacity: 0;
+    }
+}
+
+.scan-center {
+    position: relative;
+    z-index: 1;
+    width: 42px;
+    height: 42px;
+    background: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 2px 2px 0 #000;
+}
+
+.scan-icon {
+    font-size: 20px;
+    line-height: 1;
+    filter: grayscale(1);
+}
+
 .scan-stats {
     display: flex;
     gap: 40px;
@@ -847,6 +917,57 @@ footer {
     background: var(--bg-main);
 }
 
+/* Hover affordances (kept minimal for the e-ink theme) */
+.summary-card,
+.category-card,
+.finding-item,
+.btn,
+.action-btn {
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.1s ease;
+}
+
+.summary-card:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 #000;
+}
+
+.category-card:hover {
+    background: var(--bg-surface);
+}
+
+.finding-item:hover {
+    background: var(--bg-surface);
+}
+
+.btn.primary:hover,
+.btn.secondary:hover,
+.action-btn:hover {
+    transform: translate(-1px, -1px);
+}
+
+.btn.primary:active,
+.btn.secondary:active {
+    transform: translate(4px, 4px);
+}
+
+/* Respect reduced-motion: stop the scanner ring animation */
+@media (prefers-reduced-motion: reduce) {
+
+    .scan-ring {
+        animation: none;
+        opacity: 0.4;
+    }
+
+    .summary-card,
+    .category-card,
+    .finding-item,
+    .btn,
+    .action-btn,
+    .progress-fill {
+        transition: none;
+    }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .container {
@@ -912,4 +1033,281 @@ footer {
         padding: 16px 24px;
         width: 100%;
     }
+}
+
+/* ==========================================================================
+   UI IMPROVEMENTS — appended section (keeps the e-ink system intact)
+   ========================================================================== */
+
+/* --- Ink-stamp trust badge (replaces the glassy pill) ------------------- */
+.trust-strip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin: 10px 0 40px;
+}
+
+.ink-stamp {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 22px;
+    border: 3px double var(--border-color);
+    background: var(--bg-panel);
+    transform: rotate(-1.5deg);
+    box-shadow: var(--e-ink-shadow-sm);
+    font-family: 'Inter', sans-serif;
+    font-weight: 800;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-primary);
+    /* slightly uneven ink coverage, like a real stamp */
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='6' height='6' fill='white'/%3E%3Cpath d='M1 4h1v1H1zM4 1h1v1H4z' fill='white' fill-opacity='0.85'/%3E%3C/svg%3E");
+}
+
+.ink-stamp .stamp-icon {
+    font-size: 1rem;
+    filter: grayscale(1) contrast(1.4);
+}
+
+.trust-strip .trust-note {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-align: center;
+    max-width: 460px;
+    line-height: 1.6;
+}
+
+.trust-strip .trust-note strong {
+    color: var(--text-primary);
+}
+
+/* --- Detected-pattern chips (inventory tags under the dropzone) --------- */
+.pattern-coverage {
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px dotted var(--border-color);
+}
+
+.pattern-coverage .coverage-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-secondary);
+    display: block;
+    text-align: center;
+    margin-bottom: 14px;
+}
+
+.pattern-chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+}
+
+.pattern-chips .chip {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border: 2px solid var(--border-color);
+    background: var(--bg-panel);
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.pattern-chips .chip.more {
+    background: var(--text-primary);
+    color: var(--bg-panel);
+    border-style: dashed;
+    border-color: var(--bg-panel);
+    outline: 2px solid var(--border-color);
+}
+
+/* --- Custom re-scan section (was inline-styled) -------------------------- */
+.custom-rescan-section {
+    margin-top: 40px;
+    padding-top: 32px;
+    border-top: 4px solid var(--border-color);
+}
+
+.custom-rescan-section h3 {
+    margin-bottom: 12px;
+}
+
+.rescan-row {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+}
+
+.custom-pattern-input {
+    flex: 1;
+    padding: 12px;
+    border: 3px solid var(--border-color);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.95rem;
+    background: var(--bg-panel);
+    color: var(--text-primary);
+    box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.08);
+}
+
+.custom-pattern-input:focus {
+    outline: 3px dotted var(--border-color);
+    outline-offset: 2px;
+}
+
+.rescan-hint {
+    margin-top: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Clickable example chips that fill the regex input */
+.example-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.example-chips .example-chip {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border: 2px dashed var(--border-color);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background 0.1s, border-style 0.1s;
+}
+
+.example-chips .example-chip:hover,
+.example-chips .example-chip:focus-visible {
+    background: var(--text-primary);
+    color: var(--bg-panel);
+    border-style: solid;
+}
+
+/* --- Footer --------------------------------------------------------------- */
+.site-footer {
+    margin-top: 60px;
+    padding: 30px 20px 10px;
+    border-top: 4px solid var(--border-color);
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-secondary);
+}
+
+.site-footer a {
+    color: var(--text-primary);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+}
+
+.site-footer .footer-line {
+    margin-bottom: 8px;
+}
+
+/* --- Toast (#srToast injected by app.js): e-ink override ------------------ */
+#srToast {
+    background: var(--bg-panel) !important;
+    color: var(--text-primary) !important;
+    border: 3px solid var(--border-color) !important;
+    border-radius: 0 !important;
+    box-shadow: var(--e-ink-shadow) !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* --- Keyboard focus (visible, dotted, e-reader style) ---------------------- */
+.dropzone:focus-visible,
+.btn:focus-visible,
+.action-btn:focus-visible,
+.github-header-link:focus-visible,
+.checkbox-wrapper input:focus-visible + .custom-checkbox {
+    outline: 3px dotted var(--border-color);
+    outline-offset: 3px;
+}
+
+/* --- noscript notice -------------------------------------------------------- */
+.noscript-notice {
+    border: 3px solid var(--border-color);
+    background: var(--bg-panel);
+    box-shadow: var(--e-ink-shadow);
+    padding: 20px;
+    margin-bottom: 40px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+}
+
+/* --- Small-screen adjustments for the new elements -------------------------- */
+@media (max-width: 480px) {
+    .rescan-row {
+        flex-direction: column;
+    }
+
+    .ink-stamp {
+        font-size: 0.7rem;
+        letter-spacing: 1px;
+        padding: 8px 14px;
+    }
+}
+
+/* --- v2 additions: folder upload, cancel button, toast error state -------- */
+.upload-alt {
+    margin-top: 16px;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.link-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+.link-btn:hover,
+.link-btn:focus-visible {
+    background: var(--text-primary);
+    color: var(--bg-panel);
+    text-decoration: none;
+    outline: none;
+}
+
+.scan-cancel-row {
+    margin-top: 20px;
+    text-align: center;
+}
+
+/* Toast error state (app.js toggles the .error class) */
+#srToast.error {
+    background: var(--text-primary) !important;
+    color: var(--bg-panel) !important;
 }

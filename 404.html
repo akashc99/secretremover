@@ -4,11 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
     <title>404 — Secret Remover</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <!-- FIX: this tag was previously malformed (missing rel="stylesheet">),
+         which also swallowed the styles.css link below -->
     <link
         href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600;800&family=Inter:wght@400;500;600&display=swap"
-        <link rel="stylesheet" href="styles.css">
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
     <style>
         .container-404 {
             text-align: center;
@@ -16,46 +20,66 @@
             margin-top: 40px;
         }
 
-        /* Magnifying glass */
+        /* Magnifying glass — lens and handle move as ONE unit,
+           so the 404 stays locked inside the glass */
         .magnifier {
             position: relative;
-            width: 180px;
-            height: 180px;
+            width: 200px;
+            height: 200px;
             margin: 0 auto 40px;
+            /* gentle sweep of the whole magnifier, e-ink stepped */
+            animation: magnifierSweep 3.6s steps(8) infinite;
+        }
+
+        @keyframes magnifierSweep {
+            0%, 100% { transform: translateX(-10px) rotate(-2deg); }
+            50%      { transform: translateX(10px) rotate(2deg); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .magnifier { animation: none; }
         }
 
         .magnifier-lens {
-            width: 120px;
-            height: 120px;
-            border: 5px solid #000;
+            width: 140px;
+            height: 140px;
+            border: 6px solid #000;
             border-radius: 50%;
             position: absolute;
             top: 0;
-            left: 10px;
+            left: 15px;
             background: rgba(255, 255, 255, 0.6);
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.15);
         }
 
+        /* The 404 lives inside the glass — the focal element */
         .magnifier-lens span {
             font-family: 'Inter', sans-serif;
-            font-size: 2rem;
+            font-size: 3.2rem;
             font-weight: 800;
             color: #000;
-            letter-spacing: -1px;
+            letter-spacing: -2px;
+            line-height: 1;
         }
 
         .magnifier-handle {
-            width: 6px;
-            height: 70px;
+            width: 8px;
+            height: 80px;
             background: #000;
             position: absolute;
-            bottom: 0;
-            right: 20px;
+            /* Anchored ON the lens rim at its lower-right 45° point.
+               Lens center = (85, 70), outer radius = 70.
+               Rim point at 45° = (85 + 70·cos45, 70 + 70·sin45) ≈ (134.5, 119.5).
+               Anchor 2px inside the 6px border so it reads as attached:
+               distance 68 from center → (133, 118); left = 133 − width/2 = 129. */
+            top: 118px;
+            left: 129px;
             transform: rotate(-45deg);
             transform-origin: top center;
-            border-radius: 3px;
+            border-radius: 0 0 4px 4px;
         }
 
         .error-code {
@@ -79,6 +103,7 @@
             margin-bottom: 40px;
             letter-spacing: 0.5px;
         }
+
     </style>
     <script>
         // Redirect to main page if URL has a query string
@@ -114,7 +139,12 @@
                 <span class="btn-content">← Back to Secret Remover</span>
             </a>
         </div>
+
+        <footer class="site-footer">
+            <div class="footer-line">Even this error stayed local &middot; Nothing was uploaded</div>
+        </footer>
     </div>
+
 </body>
 
 </html>
